@@ -114,7 +114,11 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         context.user_data["minute"] = minute
         
         await query.edit_message_text(
-            text="Please forward a message from the target chat/group or send the chat ID where you want to schedule the message."
+            text="Please forward a message from the target chat/group or send the chat ID where you want to schedule the message.\n\n"
+                 "⚠️ IMPORTANT: Before scheduling, make sure the bot has access to the target chat:\n"
+                 "• For private chats: The user must start a chat with this bot\n"
+                 "• For groups: Add this bot as a member to the group\n"
+                 "• For channels: Add this bot as an administrator of the channel"
         )
         return SELECTING_TARGET
 
@@ -146,13 +150,37 @@ async def target_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     target_chat_title = None
     
     # Check if it's a forwarded message
-    if update.message.chat_id:
-        target_chat_id = update.message.chat_id
-        target_chat_title = str(update.message.chat_id) or "Private Chat"
+    if update.message.forward_origin.sender_user.id:
+        target_chat_id = update.message.forward_origin.sender_user.id
+        target_chat_title = str(update.message.forward_origin.sender_user.id) or "Private Chat"
     # Or if user sent a chat ID directly
     elif update.message.text and update.message.text.strip('-').isdigit():
         target_chat_id = update.message.text
         target_chat_title = "Custom Chat ID"
+    # Check if user typed "yes" to confirm scheduling despite test error
+    elif update.message.text and update.message.text.lower() == "yes" and "pending_message" in context.user_data:
+        # Retrieve the pending message details
+        pending = context.user_data["pending_message"]
+        message_id = pending["message_id"]
+        target_chat_title = pending["target_chat_title"]
+        
+        # Schedule the message and clean up
+        try:
+            await schedule_new_message(update, context, message_id)
+        except Exception as e:
+            logger.error(f"Error scheduling message: {str(e)}")
+        
+        day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        
+        await update.message.reply_text(
+            f"✅ Message scheduled successfully!\n"
+            f"It will be sent every {day_names[pending['day_of_week']]} at {pending['time'].hour:02d}:{pending['time'].minute:02d} "
+            f"to {target_chat_title}."
+        )
+        
+        # Clear user data
+        context.user_data.clear()
+        return ConversationHandler.END
     else:
         await update.message.reply_text("I couldn't identify a target chat. Please forward a message from a chat or send a numeric chat ID.")
         return SELECTING_TARGET
@@ -188,29 +216,55 @@ async def target_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         )
         
         await update.message.reply_text("✅ Test message sent successfully!")
+        
+        # Schedule the message using the application's job queue
+        try:
+            await schedule_new_message(update, context, message_id)
+        except Exception as e:
+            logger.error(f"Error scheduling message: {str(e)}")
+            # Even if scheduling fails, the message is still in the database
+            # and will be scheduled next time the bot restarts
+        
+        day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        
+        await update.message.reply_text(
+            f"✅ Message scheduled successfully!\n"
+            f"It will be sent every {day_names[context.user_data['day']]} at {context.user_data['hour']:02d}:{context.user_data['minute']:02d} "
+            f"to {target_chat_title}."
+        )
+        
+        # Clear user data
+        context.user_data.clear()
+        return ConversationHandler.END
+        
     except Exception as e:
-        await update.message.reply_text(f"❌ Failed to send test message: {str(e)}\nPlease check if the bot has access to the target chat.")
-        logger.error(f"Error sending test message: {str(e)}")
-    
-    # Schedule the message using the application's job queue
-    try:
-        await schedule_new_message(update, context, message_id)
-    except Exception as e:
-        logger.error(f"Error scheduling message: {str(e)}")
-        # Even if scheduling fails, the message is still in the database
-        # and will be scheduled next time the bot restarts
-    
-    day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    
-    await update.message.reply_text(
-        f"✅ Message scheduled successfully!\n"
-        f"It will be sent every {day_names[context.user_data['day']]} at {context.user_data['hour']:02d}:{context.user_data['minute']:02d} "
-        f"to {target_chat_title}."
-    )
-    
-    # Clear user data
-    context.user_data.clear()
-    return ConversationHandler.END
+        error_message = str(e)
+        access_instructions = (
+            "To give the bot access to the target chat:\n"
+            "• For private chats: The user must start a chat with this bot\n"
+            "• For groups: Add this bot as a member to the group\n"
+            "• For channels: Add this bot as an administrator of the channel\n\n"
+            "Would you like to proceed with scheduling anyway? Use /start to try again or type 'yes' to continue."
+        )
+        
+        await update.message.reply_text(
+            f"❌ Failed to send test message: {error_message}\n\n"
+            f"{access_instructions}"
+        )
+        logger.error(f"Error sending test message: {error_message}")
+        
+        # Wait for user confirmation before proceeding
+        context.user_data["pending_message"] = {
+            "user_id": update.effective_user.id,
+            "chat_id": update.effective_chat.id,
+            "message_text": context.user_data["message"],
+            "day_of_week": context.user_data["day"],
+            "time": scheduled_time,
+            "target_chat_id": str(target_chat_id),
+            "target_chat_title": target_chat_title,
+            "message_id": message_id
+        }
+        return SELECTING_TARGET
 
 async def list_scheduled_messages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """List all scheduled messages for the user."""
@@ -383,6 +437,7 @@ def main() -> None:
             SELECTING_TARGET: [MessageHandler(filters.ALL & ~filters.COMMAND, target_handler)],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
+        allow_reentry=True
     )
 
     # Add handlers
