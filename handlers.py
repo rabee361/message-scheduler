@@ -8,10 +8,7 @@ from logger import logger
 
 
 # Define states for conversation handler
-SELECTING_ACTION, TYPING_CHAT_MESSAGE, TYPING_USER_MESSAGE, SELECTING_DAY, SELECTING_HOUR, SELECTING_MINUTE, SELECTING_TARGET, TEST_ACTION = range(8)
-
-
-
+SELECTING_ACTION, TYPING_CHAT_MESSAGE, TYPING_USER_MESSAGE, SELECTING_DAY, TYPING_HOUR, TYPING_MINUTE, SELECTING_TARGET, TEST_ACTION = range(8)
 
 
 
@@ -39,6 +36,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     )
     return SELECTING_ACTION
 
+
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Handle button presses."""
     query = update.callback_query
@@ -48,7 +46,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await query.edit_message_text(text="Please enter the message you want to schedule:")
         return TYPING_CHAT_MESSAGE
     if query.data == "schedule_for_me":
-        await query.edit_message_text(text="Please enter the message you want to schedule for you:")
+        context.user_data["is_self_message"] = True
+        await query.edit_message_text(text="Please enter the message you want to schedule for yourself:")
         return TYPING_USER_MESSAGE
     elif query.data == "list":
         await list_scheduled_messages(update, context)
@@ -62,52 +61,62 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         day = int(query.data.split("_")[1])
         context.user_data["day"] = day
         
-        # Ask for hour
-        keyboard = [[InlineKeyboardButton(str(i), callback_data=f"hour_{i}") for i in range(0, 24, 4)]]
-        keyboard.append([InlineKeyboardButton(str(i), callback_data=f"hour_{i}") for i in range(1, 24, 4)])
-        keyboard.append([InlineKeyboardButton(str(i), callback_data=f"hour_{i}") for i in range(2, 24, 4)])
-        keyboard.append([InlineKeyboardButton(str(i), callback_data=f"hour_{i}") for i in range(3, 24, 4)])
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
+        # Ask for hour input
         await query.edit_message_text(
-            text=f"Selected day: {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][day]}. Now select the hour:",
-            reply_markup=reply_markup
+            text=f"Selected day: {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][day]}.\n\nPlease enter an hour (0-23):"
         )
-        return SELECTING_HOUR
-    
-    # Hour selection
-    elif query.data.startswith("hour_"):
-        hour = int(query.data.split("_")[1])
-        context.user_data["hour"] = hour
-        
-        # Ask for minute
-        keyboard = [
-            [InlineKeyboardButton("00", callback_data="minute_0"), 
-             InlineKeyboardButton("15", callback_data="minute_15"),
-             InlineKeyboardButton("30", callback_data="minute_30"),
-             InlineKeyboardButton("45", callback_data="minute_45")]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        await query.edit_message_text(
-            text=f"Selected time: {hour}:XX. Now select the minute:",
-            reply_markup=reply_markup
+        return TYPING_HOUR
+
+
+async def hour_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Process hour input and ask for minute."""
+    try:
+        hour = int(update.message.text.strip())
+        if 0 <= hour <= 23:
+            context.user_data["hour"] = hour
+            await update.message.reply_text(
+                f"Selected hour: {hour}\n\nPlease enter a minute (0-59):"
+            )
+            return TYPING_MINUTE
+        else:
+            await update.message.reply_text(
+                "⚠️ Invalid hour. Please enter a number between 0 and 23:"
+            )
+            return TYPING_HOUR
+    except ValueError:
+        await update.message.reply_text(
+            "⚠️ Invalid input. Please enter a number between 0 and 23:"
         )
-        return SELECTING_MINUTE
-    
-    # Minute selection
-    elif query.data.startswith("minute_"):
-        minute = int(query.data.split("_")[1])
-        context.user_data["minute"] = minute
-        
-        await query.edit_message_text(
-            text="Please forward a message from the target chat/group or send the chat ID where you want to schedule the message.\n\n"
-                 "⚠️ IMPORTANT: Before scheduling, make sure the bot has access to the target chat:\n"
-                 "• For private chats: The user must start a chat with this bot\n"
-                 "• For groups: Add this bot as a member to the group\n"
-                 "• For channels: Add this bot as an administrator of the channel"
+        return TYPING_HOUR
+
+
+async def minute_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Process minute input and continue the flow."""
+    try:
+        minute = int(update.message.text.strip())
+        if 0 <= minute <= 59:
+            context.user_data["minute"] = minute
+            
+            await update.message.reply_text(
+                f"Selected time: {context.user_data['hour']:02d}:{minute:02d}\n\n"
+                "Please forward a message from the target chat/group or send the chat ID where you want to schedule the message.\n\n"
+                "⚠️ IMPORTANT: Before scheduling, make sure the bot has access to the target chat:\n"
+                "• For private chats: The user must start a chat with this bot\n"
+                "• For groups: Add this bot as a member to the group\n"
+                "• For channels: Add this bot as an administrator of the channel"
+            )
+            return SELECTING_TARGET
+        else:
+            await update.message.reply_text(
+                "⚠️ Invalid minute. Please enter a number between 0 and 59:"
+            )
+            return TYPING_MINUTE
+    except ValueError:
+        await update.message.reply_text(
+            "⚠️ Invalid input. Please enter a number between 0 and 59:"
         )
-        return SELECTING_TARGET
+        return TYPING_MINUTE
+
 
 async def chat_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Store message text and ask for day."""
@@ -131,6 +140,8 @@ async def chat_message_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     )
     return SELECTING_DAY
 
+
+
 async def user_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Store message text and ask for day."""
     context.user_data["message"] = update.message.text
@@ -153,13 +164,19 @@ async def user_message_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     )
     return SELECTING_DAY
 
+
+
 async def target_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Store target chat and schedule the message."""
     target_chat_id = None
     target_chat_title = None
     
+    # Check if this is a self-message (from schedule_for_me flow)
+    if context.user_data.get("is_self_message", False):
+        target_chat_id = update.effective_user.id
+        target_chat_title = "Yourself"
     # Check if it's a forwarded message
-    if update.message.forward_origin.sender_user.id:
+    elif hasattr(update.message, 'forward_origin') and update.message.forward_origin and hasattr(update.message.forward_origin, 'sender_user') and update.message.forward_origin.sender_user and hasattr(update.message.forward_origin.sender_user, 'id'):
         target_chat_id = update.message.forward_origin.sender_user.id
         target_chat_title = str(update.message.forward_origin.sender_user.id) or "Private Chat"
     # Or if user sent a chat ID directly
@@ -275,6 +292,8 @@ async def target_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         }
         return SELECTING_TARGET
 
+
+
 async def list_scheduled_messages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """List all scheduled messages for the user."""
     user_id = update.effective_user.id
@@ -307,11 +326,15 @@ async def list_scheduled_messages(update: Update, context: ContextTypes.DEFAULT_
     
     session.close()
 
+
+
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Cancel the conversation."""
     await update.message.reply_text('Operation cancelled.')
     context.user_data.clear()
     return ConversationHandler.END
+
+
 
 async def send_scheduled_message(context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send the scheduled message."""
@@ -343,6 +366,8 @@ async def send_scheduled_message(context: ContextTypes.DEFAULT_TYPE) -> None:
     
     session.close()
 
+
+
 async def delete_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Delete a scheduled message."""
     if not context.args or not context.args[0].isdigit():
@@ -373,6 +398,8 @@ async def delete_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     
     await update.message.reply_text(f"Message with ID {message_id} has been deleted.")
 
+
+
 async def schedule_new_message(update: Update, context: ContextTypes.DEFAULT_TYPE, message_id: int) -> None:
     """Schedule a newly created message using application's job queue."""
     session = Session()
@@ -398,3 +425,41 @@ async def schedule_new_message(update: Update, context: ContextTypes.DEFAULT_TYP
         logger.error(f"Failed to schedule message {message_id}. Job queue: {context.application.job_queue}")
     
     session.close()
+
+
+async def test_schedule(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Test the job queue by scheduling a message to be sent in 30 seconds."""
+    chat_id = update.effective_chat.id
+    
+    await update.message.reply_text("Scheduling a test message to be sent in 30 seconds...")
+    
+    # Schedule a job to run once after 30 seconds
+    context.application.job_queue.run_once(
+        callback=test_job_callback,
+        when=30,
+        data={
+            "chat_id": chat_id,
+            "message": "This is a test message from the job queue! If you see this, your job queue is working correctly."
+        }
+    )
+    
+    # Show all active jobs
+    jobs = context.application.job_queue.jobs()
+    job_names = [job.name or "unnamed" for job in jobs]
+    await update.message.reply_text(f"Currently scheduled jobs: {len(jobs)}\n{', '.join(job_names)}")
+
+
+async def test_job_callback(context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Callback function for the test job."""
+    job_data = context.job.data
+    chat_id = job_data["chat_id"]
+    message = job_data["message"]
+    
+    logger.info(f"Executing test job callback for chat {chat_id}")
+    
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text=message
+    )
+    
+    logger.info(f"Test message successfully sent to {chat_id}")
