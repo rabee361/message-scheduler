@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    restart: always
+    environment:
+      # Database (Remote)
+      - DB_TYPE=mysqldb
+      - DB_MYSQLDB_HOST=localhost
+      - DB_MYSQLDB_PORT=3306
+      - DB_MYSQLDB_DATABASE=n8n_db
+      - DB_MYSQLDB_USER=n8n_user
+      - DB_MYSQLDB_PASSWORD=LLCN8N123
+
+      # n8n Configuration - Fixed for subpath
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - NODE_ENV=production
+      - WEBHOOK_TUNNEL_URL=http://62.72.23.174/n8n/
+      - WEBHOOK_URL=http://62.72.23.174/
+      - GENERIC_TIMEZONE=UTC
+
+      # Editor - Corrected base URL
+      - N8N_EDITOR_BASE_URL=http://62.72.23.174/n8n/
+      - N8N_PATH=/n8n/
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+
+      - N8N_PUBLIC_API_DISABLED=false
+      - N8N_PUBLIC_API_SWAGGERUI_DISABLED=false
+
+      # Executions
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=168
+
+      # Task runners (to suppress deprecation warning)
+      - N8N_RUNNERS_ENABLED=true
+      
+      # Security (to suppress deprecation warning)
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:
