@@ -5,8 +5,13 @@ services:
     image: n8nio/n8n:latest
     restart: always
     environment:
-      # Security (to suppress deprecation warning)
-      - N8N_GIT_NODE_DISABLE_BARE_REPOS=true
+      # Database (Remote)
+      - DB_TYPE=mysqldb
+      - DB_MYSQLDB_HOST=62.72.23.174
+      - DB_MYSQLDB_PORT=3306
+      - DB_MYSQLDB_DATABASE=n8n_db
+      - DB_MYSQLDB_USER=n8n_user
+      - DB_MYSQLDB_PASSWORD=LLCn8n123@@
 
       # n8n Configuration - Fixed for subpath
       - N8N_HOST=localhost
@@ -24,15 +29,15 @@ services:
       - N8N_PUBLIC_API_DISABLED=false
       - N8N_PUBLIC_API_SWAGGERUI_DISABLED=false
 
-      - N8N_SECURE_COOKIE=false
-
       # Executions
       - EXECUTIONS_DATA_PRUNE=true
       - EXECUTIONS_DATA_MAX_AGE=168
 
       # Task runners (to suppress deprecation warning)
       - N8N_RUNNERS_ENABLED=true
-      
+
+      - N8N_SECURE_COOKIE=false
+
       # Security (to suppress deprecation warning)
       - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
 
