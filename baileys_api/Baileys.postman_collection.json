@@ -1,0 +1,306 @@
+{
+	"info": {
+		"_postman_id": "0fcb9941-d1ac-42ae-bf32-6c6afd94bc57",
+		"name": "Baileys",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27586797"
+	},
+	"item": [
+		{
+			"name": "restart session",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:3001/api/sessions/rabee11/restart",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"sessions",
+						"rabee11",
+						"restart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get session  QR",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWdnY2c0NGMwMDA2MnNqaDJ3MnZ5YTZpIiwiaWF0IjoxNzU5ODI4NDkzLCJleHAiOjE3NjA0MzMyOTN9.nXdwHYrQmCxha4gVXf6TNo_rRopwDrEarUoEKBFotTU",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:3001/api/sessions/rabee11/qr",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"sessions",
+						"rabee11",
+						"qr"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create webhook",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWdxdzAyMHIwMDAwaWxobDZ6dzVtdW44IiwiaWF0IjoxNzYwNDY1OTk4LCJleHAiOjE3NjEwNzA3OTh9.esFpD3cC5psb6Yc7aeB13ttFxS8IThKux2pqGoqby1A",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"url\": \"https://lynxon.net/n8n/webhook-test/agent-webhook\",\r\n  \"events\": [\"message.received\", \"connection.updated\"],\r\n  \"secret\": \"12345\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3001/api/webhooks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"webhooks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "send message",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWdxdzAyMHIwMDAwaWxobDZ6dzVtdW44IiwiaWF0IjoxNzYwNDY1OTk4LCJleHAiOjE3NjEwNzA3OTh9.esFpD3cC5psb6Yc7aeB13ttFxS8IThKux2pqGoqby1A",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"to\": \"963930827759@s.whatsapp.net\",\r\n  \"content\": {\r\n    \"text\": \"hi\"\r\n  }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3001/api/messages/test2/send",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"messages",
+						"test2",
+						"send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create session",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWdxdzAyMHIwMDAwaWxobDZ6dzVtdW44IiwiaWF0IjoxNzYwNDY1OTk4LCJleHAiOjE3NjEwNzA3OTh9.esFpD3cC5psb6Yc7aeB13ttFxS8IThKux2pqGoqby1A",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"sessionId\": \"test5\",\r\n  \"usePairingCode\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3001/api/sessions",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"sessions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "test webhook",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWdxdzAyMHIwMDAwaWxobDZ6dzVtdW44IiwiaWF0IjoxNzYwNDY1OTk4LCJleHAiOjE3NjEwNzA3OTh9.esFpD3cC5psb6Yc7aeB13ttFxS8IThKux2pqGoqby1A",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:3001/api/webhooks/4/test",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"webhooks",
+						"4",
+						"test"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "session status",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWdxdzAyMHIwMDAwaWxobDZ6dzVtdW44IiwiaWF0IjoxNzYwNDY1OTk4LCJleHAiOjE3NjEwNzA3OTh9.esFpD3cC5psb6Yc7aeB13ttFxS8IThKux2pqGoqby1A",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:3001/api/sessions/test6/status",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"sessions",
+						"test6",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "user webhooks",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWdxdzAyMHIwMDAwaWxobDZ6dzVtdW44IiwiaWF0IjoxNzYwNDY1OTk4LCJleHAiOjE3NjEwNzA3OTh9.esFpD3cC5psb6Yc7aeB13ttFxS8IThKux2pqGoqby1A",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:3001/api/webhooks",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"webhooks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "test the lynxon test url",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://lynxon.net/n8n/webhook-test/agent-webhook",
+					"protocol": "https",
+					"host": [
+						"lynxon",
+						"net"
+					],
+					"path": [
+						"n8n",
+						"webhook-test",
+						"agent-webhook"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
