@@ -18,7 +18,6 @@ import { logger, whatsappLogger } from '../Utils/apiLogger';
 import { DatabaseService } from './DatabaseService';
 import { WebhookService } from './WebhookService';
 import { WhatsAppSession, SessionStatus } from '../Types/api';
-import { getSessionQueue } from '../Utils/queueManager';
 
 
 export class WhatsAppService {
@@ -383,29 +382,12 @@ export class WhatsAppService {
               });
 
           }
-
-          // Emit to websocket clients with queue for outgoing messages
-          if (message.key.fromMe) {
-            const queue = getSessionQueue(sessionId);
-            
-            // whatsappLogger.info(`[QUEUED EMIT] Outgoing message ${message.key.id} added to queue for session ${sessionId}`);
-            
-            queue.add(async () => {
-              this.io.emit('message', {
-                sessionId,
-                message,
-                type
-              });
-              whatsappLogger.info(`[EMITTED] Outgoing message ${message.key.id} emitted from queue for session ${sessionId}`);
-            });
-          } else {
-            whatsappLogger.info(`[DIRECT EMIT] Incoming message ${message.key.id} emitting directly for session ${sessionId}`);
+          
             this.io.emit('message', {
               sessionId,
               message,
               type
             });
-          }
 
           // Send webhook only for messages not sent by me
           if (!message.key.fromMe) {
