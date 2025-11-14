@@ -7,7 +7,7 @@ services:
     environment:
       # Database (Remote)
       - DB_TYPE=mysqldb
-      - DB_MYSQLDB_HOST=62.72.23.174
+      - DB_MYSQLDB_HOST=https://cricketlike-shiloh-marshlike.ngrok-free.dev/
       - DB_MYSQLDB_PORT=3306
       - DB_MYSQLDB_DATABASE=n8n_db
       - DB_MYSQLDB_USER=n8n_user
@@ -17,12 +17,12 @@ services:
       - N8N_HOST=localhost
       - N8N_PORT=5678
       - NODE_ENV=production
-      - WEBHOOK_TUNNEL_URL=http://62.72.23.174/n8n/
-      - WEBHOOK_URL=http://62.72.23.174/
+      - WEBHOOK_TUNNEL_URL=https://https://cricketlike-shiloh-marshlike.ngrok-free.dev//n8n/
+      - WEBHOOK_URL=https://https://cricketlike-shiloh-marshlike.ngrok-free.dev//
       - GENERIC_TIMEZONE=UTC
 
       # Editor - Corrected base URL
-      - N8N_EDITOR_BASE_URL=http://62.72.23.174/n8n/
+      - N8N_EDITOR_BASE_URL=https://https://cricketlike-shiloh-marshlike.ngrok-free.dev//n8n/
       - N8N_PATH=/n8n/
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
 
