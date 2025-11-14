@@ -17,12 +17,12 @@ services:
       - N8N_HOST=localhost
       - N8N_PORT=5678
       - NODE_ENV=production
-      - WEBHOOK_TUNNEL_URL=https://cricketlike-shiloh-marshlike.ngrok-free.dev//n8n/
-      - WEBHOOK_URL=https://cricketlike-shiloh-marshlike.ngrok-free.dev//
+      - WEBHOOK_TUNNEL_URL=https://cricketlike-shiloh-marshlike.ngrok-free.dev/n8n/
+      - WEBHOOK_URL=https://cricketlike-shiloh-marshlike.ngrok-free.dev/
       - GENERIC_TIMEZONE=UTC
 
       # Editor - Corrected base URL
-      - N8N_EDITOR_BASE_URL=https://cricketlike-shiloh-marshlike.ngrok-free.dev//n8n/
+      - N8N_EDITOR_BASE_URL=https://cricketlike-shiloh-marshlike.ngrok-free.dev/n8n/
       - N8N_PATH=/n8n/
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
 
