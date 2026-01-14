@@ -29,9 +29,6 @@ services:
       - N8N_PUBLIC_API_DISABLED=false
       - N8N_PUBLIC_API_SWAGGERUI_DISABLED=false
 
-      # Executions
-      - EXECUTIONS_DATA_PRUNE=true
-      - EXECUTIONS_DATA_MAX_AGE: 168
 
       # Task runners (to suppress deprecation warning)
       - N8N_RUNNERS_ENABLED=true
@@ -44,6 +41,7 @@ services:
       # Enable Execute Command node
       - N8N_EXECUTIONS_DATA_PRUNE=true
       - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=168
 
     ports:
       - "5678:5678"
