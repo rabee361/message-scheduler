@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   n8n:
@@ -6,12 +6,12 @@ services:
     restart: always
     environment:
       # Database (Remote)
-      - DB_TYPE=mysqldb
-      - DB_MYSQLDB_HOST=62.72.23.174
-      - DB_MYSQLDB_PORT=3306
-      - DB_MYSQLDB_DATABASE=n8n_db
-      - DB_MYSQLDB_USER=n8n_user
-      - DB_MYSQLDB_PASSWORD=LLCn8n123@@
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=62.72.23.174
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n_db
+      - DB_POSTGRESDB_USER=n8n_user
+      - DB_POSTGRESDB_PASSWORD=LLCn8n123@@
 
       # n8n Configuration - Fixed for subpath
       - N8N_HOST=localhost
@@ -31,7 +31,7 @@ services:
 
       # Executions
       - EXECUTIONS_DATA_PRUNE=true
-      - EXECUTIONS_DATA_MAX_AGE=168
+      - EXECUTIONS_DATA_MAX_AGE: 168
 
       # Task runners (to suppress deprecation warning)
       - N8N_RUNNERS_ENABLED=true
@@ -41,10 +41,27 @@ services:
       # Security (to suppress deprecation warning)
       - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
 
+      # Enable Execute Command node
+      - N8N_EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_PRUNE=true
+
     ports:
       - "5678:5678"
     volumes:
       - n8n_data:/home/node/.n8n
+      - ./downloads:/tmp/downloads
+    cap_add:
+      - SYS_ADMIN # May be needed for some operations
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:6-alpine
+    restart: always
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
 
 volumes:
   n8n_data:
+  redis_data:
