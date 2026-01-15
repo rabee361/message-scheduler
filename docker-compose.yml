@@ -18,7 +18,7 @@ services:
       - N8N_PORT=5678
       - NODE_ENV=production
       - WEBHOOK_TUNNEL_URL=https://rabeehasan.online/n8n/
-      - WEBHOOK_URL=https://rabeehasan.online/
+      - WEBHOOK_URL=https://rabeehasan.online/n8n/
       - GENERIC_TIMEZONE=UTC
 
       # Editor - Corrected base URL
