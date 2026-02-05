@@ -14,7 +14,8 @@ services:
       - DB_POSTGRESDB_PASSWORD=LLCn8n123@@
 
       # n8n Configuration - Fixed for subpath
-      - N8N_HOST=localhost
+      - N8N_HOST=rabeehasan.online
+      - N8N_PROTOCOL=https
       - N8N_PORT=5678
       - NODE_ENV=production
       - WEBHOOK_TUNNEL_URL=https://rabeehasan.online/n8n/
