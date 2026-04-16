@@ -31,10 +31,10 @@ services:
       - N8N_PUBLIC_API_SWAGGERUI_DISABLED=${N8N_PUBLIC_API_SWAGGERUI_DISABLED}
 
 
-      # Task runners (to suppress deprecation warning)
-      - N8N_RUNNERS_ENABLED=${N8N_RUNNERS_ENABLED}
-
       - N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE}
+
+      # Trust nginx reverse proxy
+      - N8N_TRUST_PROXY=true
 
       # Security (to suppress deprecation warning)
       - N8N_BLOCK_ENV_ACCESS_IN_NODE=${N8N_BLOCK_ENV_ACCESS_IN_NODE}
